@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>condorZeitung</title>
+
+  <link rel="stylesheet" href="dflip/css/dflip.min.css" />
+  <link rel="stylesheet" href="dflip/css/themify-icons.min.css" />
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg:           #090d18;
+      --surface:      #0f1623;
+      --border:       #1e2738;
+      --text-primary: #f1f5f9;
+      --text-muted:   #64748b;
+      --accent:       #ffffff;
+      --error:        #ef4444;
+      --radius:       12px;
+      --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── LOGIN ────────────────────────────────────────────────── */
+
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 50% 0%, #162040 0%, #090d18 65%);
+      z-index: 1000;
+      padding: 24px 16px;
+      transition: opacity 0.5s ease;
+    }
+
+    #login-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Logo encima del card */
+    .login-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .login-brand svg {
+      width: 68px;
+      height: auto;
+      filter: drop-shadow(0 0 18px rgba(255,255,255,0.12));
+    }
+
+    .login-brand-name {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* Card */
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+
+    .login-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.4px;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }
+
+    .login-header p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #access-key {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 16px; /* evita zoom en iOS */
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    #access-key::placeholder { color: var(--text-muted); }
+
+    #access-key:focus {
+      border-color: #374151;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+    }
+
+    #access-key.shake {
+      animation: shake 0.4s ease;
+      border-color: var(--error);
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-7px); }
+      40%      { transform: translateX(7px); }
+      60%      { transform: translateX(-5px); }
+      80%      { transform: translateX(5px); }
+    }
+
+    #error-msg {
+      font-size: 12px;
+      color: var(--error);
+      min-height: 16px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    #error-msg.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #login-btn {
+      width: 100%;
+      min-height: 48px;
+      padding: 13px;
+      background: var(--accent);
+      color: #090d18;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -0.1px;
+      transition: background 0.2s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #login-btn:hover  { background: #e2e8f0; }
+    #login-btn:active { transform: scale(0.98); }
+
+    .login-footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    /* ─── FLIPBOOK ─────────────────────────────────────────────── */
+
+    #flipbook-container {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    #flipbook-container.visible { opacity: 1; }
+
+    #df-flipbook {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ─── RESPONSIVE ───────────────────────────────────────────── */
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 28px 20px;
+        border-radius: 16px;
+        gap: 18px;
+      }
+      .login-brand svg { width: 54px; }
+      .login-brand { margin-bottom: 20px; }
+      .login-header h1 { font-size: 18px; }
+    }
+
+    @media (max-height: 600px) {
+      .login-brand { margin-bottom: 16px; }
+      .login-brand svg { width: 44px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ─── LOGIN ─────────────────────────────────────────────────── -->
+  <div id="login-screen">
+
+    <div class="login-brand">
+      <!-- Cóndor SVG -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 72" fill="white">
+        <path d="
+          M70,16
+          C62,12 50,15 38,22 C26,29  12,32  2,28
+          C10,36  26,35  38,29
+          L35,44
+          C41,37  51,33  59,36
+          L57,49
+          C62,43  67,40  70,41
+          C73,40  78,43  83,49
+          L81,36
+          C89,33  99,37  105,44
+          L102,29
+          C114,35  130,36  138,28
+          C128,32  114,29  102,22
+          C90,15  78,12  70,16Z
+        "/>
+        <!-- Cabeza -->
+        <ellipse cx="70" cy="12" rx="5" ry="4"/>
+      </svg>
+      <span class="login-brand-name">condorZeitung</span>
+    </div>
+
+    <div class="login-card">
+      <div class="login-header">
+        <h1>Acceso restringido</h1>
+        <p>Ingresa tu clave para ver la publicación.</p>
+      </div>
+
+      <div class="input-group">
+        <input
+          id="access-key"
+          type="password"
+          placeholder="Clave de acceso"
+          autocomplete="current-password"
+          spellcheck="false"
+        />
+        <span id="error-msg">Clave incorrecta. Intenta nuevamente.</span>
+      </div>
+
+      <button id="login-btn">Entrar</button>
+
+      <p class="login-footer">Contenido privado &mdash; Uso exclusivo</p>
+    </div>
+
+  </div>
+
+  <!-- ─── FLIPBOOK ───────────────────────────────────────────────── -->
+  <div id="flipbook-container">
+    <div id="df-flipbook"></div>
+  </div>
+
+  <script src="dflip/js/libs/jquery.min.js"></script>
+  <script src="dflip/js/dflip.min.js"></script>
+
+  <script>
+    (function () {
+      const PASSWORD = 'gutenmorgen123';
+
+      const loginScreen  = document.getElementById('login-screen');
+      const flipbookWrap = document.getElementById('flipbook-container');
+      const input        = document.getElementById('access-key');
+      const btn          = document.getElementById('login-btn');
+      const errorMsg     = document.getElementById('error-msg');
+
+      function showError() {
+        errorMsg.classList.add('visible');
+        input.classList.remove('shake');
+        void input.offsetWidth;
+        input.classList.add('shake');
+        input.addEventListener('animationend', function h() {
+          input.classList.remove('shake');
+          input.removeEventListener('animationend', h);
+        });
+      }
+
+      function clearError() {
+        errorMsg.classList.remove('visible');
+      }
+
+      function unlockFlipbook() {
+        loginScreen.classList.add('fade-out');
+        loginScreen.addEventListener('transitionend', function handler() {
+          loginScreen.style.display = 'none';
+
+          flipbookWrap.style.display = 'block';
+          void flipbookWrap.offsetWidth;
+          flipbookWrap.classList.add('visible');
+
+          // Inicializa después del paint para que DearFlip mida el contenedor real
+          setTimeout(function () {
+            $('#df-flipbook').flipBook('Condor0805.pdf', {
+              backgroundColor: '#090d18',
+              controlsPosition: 'bottom',
+              paddingTop: 10,
+              paddingBottom: 50,
+              webgl: true,
+              autoEnableOutline: false,
+              autoEnableThumbnail: false
+            });
+          }, 120);
+
+        }, { once: true });
+      }
+
+      function validate() {
+        const value = input.value.toLowerCase().trim();
+        if (value === PASSWORD) {
+          clearError();
+          unlockFlipbook();
+        } else {
+          showError();
+          input.select();
+        }
+      }
+
+      btn.addEventListener('click', validate);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') validate();
+        if (errorMsg.classList.contains('visible')) clearError();
+      });
+    })();
+  </script>
+
+</body>
+</html>
