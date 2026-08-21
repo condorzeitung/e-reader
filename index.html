@@ -506,6 +506,7 @@
       const downloadTip = document.getElementById('download-tip');
 
       const editionFiles = [
+        'Condor_08_21.pdf',
         'Condor_08_14.pdf',
         'Condor_08_07.pdf',
         'Condor_07_31.pdf',
@@ -531,7 +532,7 @@
           return parseEditionDate(b.fileName) - parseEditionDate(a.fileName);
         });
 
-      let activeEdition = editions[0] ? editions[0].fileName : 'Condor_08_14.pdf';
+      let activeEdition = editions[0] ? editions[0].fileName : 'Condor_08_21.pdf';
 
       function formatEditionLabel(fileName) {
         const match = fileName.match(/Condor_(\d{2})_(\d{2})\.pdf$/i);
